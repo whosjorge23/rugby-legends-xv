@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react'
 import { MatchCard } from '../components/MatchCard'
 import { Button } from '../components/Button'
 import type { SimulatedMatch } from '../types/rugby'
@@ -8,22 +9,91 @@ type SimulationPageProps = {
   onReplay: () => void
 }
 
-export const SimulationPage = ({ matches, onResult, onReplay }: SimulationPageProps) => (
-  <main className="simulation-page">
-    <section className="page-title">
-      <p className="eyebrow">Road to Webb Ellis</p>
-      <h1>Cup Run</h1>
-      <div className="result-actions">
-        <Button variant="secondary" onClick={onReplay}>
-          Replay
-        </Button>
-        <Button onClick={onResult}>Final Result</Button>
-      </div>
-    </section>
-    <section className="match-grid">
-      {matches.map((match) => (
-        <MatchCard key={match.id} match={match} />
-      ))}
-    </section>
-  </main>
-)
+export const SimulationPage = ({ matches, onResult, onReplay }: SimulationPageProps) => {
+  const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
+  const [visibleEventCounts, setVisibleEventCounts] = useState<number[]>([])
+  const [isSimulating, setIsSimulating] = useState(false)
+  const currentMatch = matches[currentMatchIndex]
+  const currentVisibleEvents = visibleEventCounts[currentMatchIndex] ?? 0
+  const currentMatchComplete = currentMatch ? currentVisibleEvents >= currentMatch.events.length : false
+  const hasNextMatch = currentMatchIndex < matches.length - 1
+  const visibleMatches = matches.slice(0, currentMatchIndex + 1)
+  const matchEventTotals = useMemo(() => matches.map((match) => match.events.length), [matches])
+
+  useEffect(() => {
+    setCurrentMatchIndex(0)
+    setVisibleEventCounts(matches.map(() => 0))
+    setIsSimulating(false)
+  }, [matches])
+
+  useEffect(() => {
+    if (!isSimulating || !currentMatch) return
+
+    if (currentMatchComplete) {
+      setIsSimulating(false)
+      return
+    }
+
+    const interval = window.setInterval(() => {
+      setVisibleEventCounts((counts) =>
+        counts.map((count, index) => {
+          if (index !== currentMatchIndex) return count
+
+          const nextCount = Math.min(count + 1, matchEventTotals[index])
+          if (nextCount >= matchEventTotals[index]) {
+            window.clearInterval(interval)
+            window.setTimeout(() => setIsSimulating(false), 0)
+          }
+
+          return nextCount
+        }),
+      )
+    }, 650)
+
+    return () => window.clearInterval(interval)
+  }, [currentMatch, currentMatchComplete, currentMatchIndex, isSimulating, matchEventTotals])
+
+  const goToNextMatch = () => {
+    setIsSimulating(false)
+    setCurrentMatchIndex((index) => Math.min(index + 1, matches.length - 1))
+  }
+
+  return (
+    <main className="simulation-page">
+      <section className="page-title">
+        <div>
+          <p className="eyebrow">Road to Webb Ellis</p>
+          <h1>Cup Run</h1>
+          {currentMatch && (
+            <p className="match-progress">
+              Match {currentMatchIndex + 1} of {matches.length}
+            </p>
+          )}
+        </div>
+        <div className="result-actions">
+          <Button variant="secondary" onClick={onReplay}>
+            Replay
+          </Button>
+          {!currentMatchComplete && (
+            <Button onClick={() => setIsSimulating(true)} disabled={isSimulating}>
+              {isSimulating ? 'Simulating...' : 'Simulate Match'}
+            </Button>
+          )}
+          {currentMatchComplete && hasNextMatch && <Button onClick={goToNextMatch}>Next Match</Button>}
+          {currentMatchComplete && !hasNextMatch && <Button onClick={onResult}>Final Result</Button>}
+        </div>
+      </section>
+      <section className="match-grid">
+        {visibleMatches.map((match, index) => (
+          <MatchCard
+            key={match.id}
+            match={match}
+            visibleEventCount={visibleEventCounts[index] ?? 0}
+            isActive={index === currentMatchIndex}
+            isComplete={index < currentMatchIndex || (index === currentMatchIndex && currentMatchComplete)}
+          />
+        ))}
+      </section>
+    </main>
+  )
+}

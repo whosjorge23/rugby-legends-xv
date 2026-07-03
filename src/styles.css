@@ -62,9 +62,11 @@ button:disabled {
   border-radius: 999px;
   background: var(--navy);
   color: #fff;
-  min-width: 68px;
+  min-width: 176px;
   min-height: 42px;
+  padding: 0 18px;
   box-shadow: 0 10px 24px var(--shadow);
+  font-size: 0.78rem;
   font-weight: 950;
   letter-spacing: 0;
 }
@@ -434,6 +436,15 @@ button:disabled {
 
 .match-card {
   padding: 18px;
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.match-card.is-active {
+  box-shadow: 0 22px 52px rgba(215, 53, 42, 0.22);
+  transform: translateY(-3px);
 }
 
 .match-card h3 {
@@ -483,6 +494,10 @@ button:disabled {
   font-weight: 800;
 }
 
+.awaiting-event {
+  color: var(--muted);
+}
+
 .event-list span {
   color: var(--muted);
   font-weight: 950;
@@ -490,6 +505,36 @@ button:disabled {
 
 .event-list strong {
   font-weight: 950;
+}
+
+.event-team {
+  border-radius: 999px;
+  background: #edf3ef;
+  color: var(--muted);
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 950;
+  margin-right: 4px;
+  padding: 2px 7px;
+  vertical-align: 1px;
+}
+
+.event-team.user-event-team {
+  background: #ffe6e2;
+  color: var(--red);
+}
+
+.event-list em {
+  font-style: normal;
+}
+
+.event-points {
+  color: var(--muted);
+  font-weight: 950;
+}
+
+.event-points.user-points {
+  color: var(--red);
 }
 
 .result-card {

@@ -115,7 +115,7 @@ export const squads: Squad[] = [
     ['Cheslin Kolbe', 'RW', 92, 96, 74, 62, 86],
     ['Willie le Roux', 'FB', 88, 89, 76, 76, 82],
   ]),
-  makeSquad('eng-2003', 'England', 'ENG', '🏴', 2003, 92, [
+  makeSquad('eng-2003', 'England', 'ENG', '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 2003, 92, [
     ['Trevor Woodman', 'LH', 87, 65, 90, 34, 84],
     ['Steve Thompson', 'HK', 88, 70, 90, 36, 82],
     ['Phil Vickery', 'TH', 90, 69, 93, 32, 84],

@@ -8,7 +8,7 @@ type HeaderProps = {
 export const Header = ({ onHome, onBuild }: HeaderProps) => (
   <header className="site-header">
     <button className="brand-mark" onClick={onHome} aria-label="Go home">
-      <span>RLXV</span>
+      <span>RUGBY LEGENDS XV</span>
     </button>
     <nav className="header-actions" aria-label="Main navigation">
       <Button variant="ghost" onClick={onHome}>
