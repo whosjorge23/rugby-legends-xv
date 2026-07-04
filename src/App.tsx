@@ -30,7 +30,12 @@ export const App = () => {
         />
       )}
       {game.view === 'simulation' && (
-        <SimulationPage matches={game.matches} onResult={() => game.setView('result')} onReplay={game.replay} />
+        <SimulationPage
+          matches={game.matches}
+          team={game.team}
+          onResult={() => game.setView('result')}
+          onReplay={game.replay}
+        />
       )}
       {game.view === 'result' && (
         <ResultPage

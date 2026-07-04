@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 import { MatchCard } from '../components/MatchCard'
 import { Button } from '../components/Button'
-import type { SimulatedMatch } from '../types/rugby'
+import { LiveMatchPitch } from '../components/LiveMatchPitch'
+import type { SelectedTeam, SimulatedMatch } from '../types/rugby'
 
 type SimulationPageProps = {
   matches: SimulatedMatch[]
+  team: SelectedTeam
   onResult: () => void
   onReplay: () => void
 }
 
-export const SimulationPage = ({ matches, onResult, onReplay }: SimulationPageProps) => {
+const EVENT_REVEAL_MS = 1800
+
+export const SimulationPage = ({ matches, team, onResult, onReplay }: SimulationPageProps) => {
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
   const [visibleEventCounts, setVisibleEventCounts] = useState<number[]>([])
   const [isSimulating, setIsSimulating] = useState(false)
@@ -48,7 +52,7 @@ export const SimulationPage = ({ matches, onResult, onReplay }: SimulationPagePr
           return nextCount
         }),
       )
-    }, 650)
+    }, EVENT_REVEAL_MS)
 
     return () => window.clearInterval(interval)
   }, [currentMatch, currentMatchComplete, currentMatchIndex, isSimulating, matchEventTotals])
@@ -83,6 +87,12 @@ export const SimulationPage = ({ matches, onResult, onReplay }: SimulationPagePr
           {currentMatchComplete && !hasNextMatch && <Button onClick={onResult}>Final Result</Button>}
         </div>
       </section>
+      <LiveMatchPitch
+        match={currentMatch}
+        team={team}
+        visibleEventCount={currentVisibleEvents}
+        isSimulating={isSimulating}
+      />
       <section className="match-grid">
         {visibleMatches.map((match, index) => (
           <MatchCard
