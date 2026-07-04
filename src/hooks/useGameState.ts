@@ -35,6 +35,8 @@ const loadState = (): SavedState => {
   }
 }
 
+const isTeamComplete = (team: SelectedTeam) => completionCount(team) === 15
+
 export const useGameState = () => {
   const [view, setView] = useState<'home' | 'build' | 'simulation' | 'result'>('home')
   const [state, setState] = useState<SavedState>(loadState)
@@ -48,16 +50,19 @@ export const useGameState = () => {
   }, [state])
 
   const roll = () => {
-    setState((current) => ({
-      ...current,
-      drawnSquad: pickOne(squads, current.drawnSquad ?? undefined),
-      hasPickedFromDraw: false,
-    }))
+    setState((current) => {
+      if (isTeamComplete(current.team)) return current
+      return {
+        ...current,
+        drawnSquad: pickOne(squads, current.drawnSquad ?? undefined),
+        hasPickedFromDraw: false,
+      }
+    })
   }
 
   const rerollTeam = () => {
     setState((current) => {
-      if (current.teamRerolls <= 0) return current
+      if (isTeamComplete(current.team) || current.teamRerolls <= 0) return current
       return {
         ...current,
         teamRerolls: current.teamRerolls - 1,
@@ -69,7 +74,7 @@ export const useGameState = () => {
 
   const rerollCup = () => {
     setState((current) => {
-      if (current.cupRerolls <= 0) return current
+      if (isTeamComplete(current.team) || current.cupRerolls <= 0) return current
       const sameCountry = squads.filter((squad) => squad.country === current.drawnSquad?.country)
       return {
         ...current,

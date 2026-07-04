@@ -4,6 +4,7 @@ import { Button } from './Button'
 type RollPanelProps = {
   squad: Squad | null
   canRoll: boolean
+  isComplete: boolean
   teamRerolls: number
   cupRerolls: number
   onRoll: () => void
@@ -11,8 +12,17 @@ type RollPanelProps = {
   onRerollCup: () => void
 }
 
-export const RollPanel = ({ squad, canRoll, teamRerolls, cupRerolls, onRoll, onRerollTeam, onRerollCup }: RollPanelProps) => {
-  const rollAgainLocked = Boolean(squad && !canRoll)
+export const RollPanel = ({
+  squad,
+  canRoll,
+  isComplete,
+  teamRerolls,
+  cupRerolls,
+  onRoll,
+  onRerollTeam,
+  onRerollCup,
+}: RollPanelProps) => {
+  const waitingForPick = Boolean(squad && !canRoll)
 
   return (
     <section className="panel roll-panel">
@@ -32,15 +42,15 @@ export const RollPanel = ({ squad, canRoll, teamRerolls, cupRerolls, onRoll, onR
           <p>Roll to reveal a historical national team.</p>
         </div>
       )}
-      {rollAgainLocked && <p className="draw-lock">Choose one available player before rolling again.</p>}
+      {waitingForPick && <p className="draw-lock">Choose one available player before rolling again.</p>}
       <div className="stacked-actions">
-        <Button onClick={onRoll} disabled={!canRoll}>
+        <Button onClick={onRoll} disabled={isComplete || !canRoll}>
           {squad ? 'Roll Again' : 'Roll'}
         </Button>
-        <Button variant="secondary" onClick={onRerollTeam} disabled={!rollAgainLocked || teamRerolls === 0}>
+        <Button variant="secondary" onClick={onRerollTeam} disabled={isComplete || !waitingForPick || teamRerolls === 0}>
           Another Team ({teamRerolls})
         </Button>
-        <Button variant="secondary" onClick={onRerollCup} disabled={!rollAgainLocked || cupRerolls === 0}>
+        <Button variant="secondary" onClick={onRerollCup} disabled={isComplete || !waitingForPick || cupRerolls === 0}>
           Another Cup ({cupRerolls})
         </Button>
       </div>

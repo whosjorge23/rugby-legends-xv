@@ -40,6 +40,7 @@ export const BuildPage = ({
       <RollPanel
         squad={drawnSquad}
         canRoll={!drawnSquad || hasPickedFromDraw}
+        isComplete={isComplete}
         teamRerolls={teamRerolls}
         cupRerolls={cupRerolls}
         onRoll={onRoll}
