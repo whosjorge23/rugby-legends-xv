@@ -14,7 +14,11 @@ export const RugbyPitch = ({ team }: RugbyPitchProps) => (
       <div className="try-line bottom" />
       <div className="pitch-grid">
         {positions.map((position) => (
-          <PositionSlot key={position.id} positionId={position.id} player={team.slots[position.id]} />
+          <PositionSlot
+            key={`${position.id}-${team.slots[position.id]?.id ?? 'empty'}`}
+            positionId={position.id}
+            player={team.slots[position.id]}
+          />
         ))}
       </div>
     </div>

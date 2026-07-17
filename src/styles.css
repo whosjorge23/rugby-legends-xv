@@ -12,6 +12,9 @@
   --navy: #153248;
   --teal: #2c8f85;
   --shadow: rgba(21, 50, 72, 0.18);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --motion-fast: 160ms;
+  --motion-base: 420ms;
 }
 
 * {
@@ -43,6 +46,14 @@ button:disabled {
   opacity: 0.52;
 }
 
+/* Motion is intentionally limited to compositor-friendly opacity and transforms. */
+.home-layout,
+.build-layout,
+.simulation-page,
+.result-page {
+  animation: page-enter var(--motion-base) var(--ease-out) both;
+}
+
 .site-header {
   display: flex;
   align-items: center;
@@ -69,6 +80,7 @@ button:disabled {
   font-size: 0.78rem;
   font-weight: 950;
   letter-spacing: 0;
+  transition: transform var(--motion-fast) ease;
 }
 
 .header-actions,
@@ -89,6 +101,20 @@ button:disabled {
   min-height: 44px;
   padding: 11px 18px;
   text-transform: uppercase;
+  transform: translateZ(0);
+  transition: transform var(--motion-fast) ease;
+}
+
+@media (hover: hover) {
+  .button:not(:disabled):hover,
+  .brand-mark:hover {
+    transform: translateY(-2px);
+  }
+}
+
+.button:not(:disabled):active,
+.brand-mark:active {
+  transform: translateY(0) scale(0.97);
 }
 
 .button-primary {
@@ -146,7 +172,16 @@ button:disabled {
 
 .hero-preview {
   transform: rotate(0.4deg);
+  animation: preview-enter 620ms 80ms var(--ease-out) both;
 }
+
+.hero-copy > * {
+  animation: rise-in var(--motion-base) var(--ease-out) both;
+}
+
+.hero-copy > :nth-child(2) { animation-delay: 50ms; }
+.hero-copy > :nth-child(3) { animation-delay: 100ms; }
+.hero-copy > :nth-child(4) { animation-delay: 150ms; }
 
 .build-layout {
   display: grid;
@@ -168,10 +203,17 @@ button:disabled {
   border: 1px solid rgba(21, 50, 72, 0.16);
   border-radius: 18px;
   box-shadow: 0 18px 42px var(--shadow);
+  contain: paint;
 }
 
 .panel {
   padding: 18px;
+  animation: rise-in var(--motion-base) var(--ease-out) both;
+}
+
+.left-rail .panel:nth-child(2),
+.rating-panel {
+  animation-delay: 70ms;
 }
 
 .panel-heading,
@@ -189,6 +231,7 @@ button:disabled {
   margin-bottom: 14px;
   min-height: 158px;
   padding: 18px;
+  animation: card-reveal 360ms var(--ease-out) both;
 }
 
 .drawn-card.empty {
@@ -249,10 +292,26 @@ button:disabled {
   color: var(--black);
   padding: 9px;
   text-align: left;
+  transition:
+    transform var(--motion-fast) ease,
+    background-color var(--motion-fast) ease;
+  animation: list-item-enter 300ms var(--ease-out) both;
 }
+
+.player-row:nth-child(2) { animation-delay: 20ms; }
+.player-row:nth-child(3) { animation-delay: 40ms; }
+.player-row:nth-child(4) { animation-delay: 60ms; }
+.player-row:nth-child(5) { animation-delay: 80ms; }
+.player-row:nth-child(6) { animation-delay: 100ms; }
+.player-row:nth-child(7) { animation-delay: 120ms; }
+.player-row:nth-child(8) { animation-delay: 140ms; }
+.player-row:nth-child(9) { animation-delay: 160ms; }
+.player-row:nth-child(10) { animation-delay: 180ms; }
+.player-row:nth-child(n + 11) { animation-delay: 200ms; }
 
 .player-row:hover {
   background: #eef8f4;
+  transform: translateX(3px);
 }
 
 .player-row:disabled {
@@ -332,10 +391,18 @@ button:disabled {
   box-shadow: 0 12px 24px rgba(23, 78, 53, 0.18);
   padding: 8px;
   text-align: center;
+  transition: transform var(--motion-fast) ease;
 }
 
 .position-slot.is-filled {
   background: #f8e6aa;
+  animation: slot-filled 420ms var(--ease-out) both;
+}
+
+@media (hover: hover) {
+  .position-slot:hover {
+    transform: translateY(-2px);
+  }
 }
 
 .slot-number {
@@ -392,6 +459,7 @@ button:disabled {
   justify-self: end;
   font-size: 1.35rem;
   font-weight: 950;
+  animation: value-pop 280ms var(--ease-out) both;
 }
 
 .selected-list {
@@ -442,6 +510,7 @@ button:disabled {
   place-items: center;
   background: rgba(21, 50, 72, 0.54);
   padding: 18px;
+  animation: fade-in 180ms ease-out both;
 }
 
 .lineup-dialog {
@@ -453,6 +522,7 @@ button:disabled {
   background: var(--paper);
   box-shadow: 0 28px 80px rgba(21, 50, 72, 0.34);
   padding: 22px;
+  animation: dialog-enter 320ms var(--ease-out) both;
 }
 
 .lineup-dialog-header {
@@ -890,11 +960,16 @@ button:disabled {
 
 .match-card {
   padding: 18px;
+  animation: rise-in var(--motion-base) var(--ease-out) both;
   transition:
     opacity 160ms ease,
     transform 160ms ease,
     box-shadow 160ms ease;
 }
+
+.match-card:nth-child(2) { animation-delay: 50ms; }
+.match-card:nth-child(3) { animation-delay: 100ms; }
+.match-card:nth-child(4) { animation-delay: 150ms; }
 
 .match-card.is-active {
   box-shadow: 0 22px 52px rgba(215, 53, 42, 0.22);
@@ -946,6 +1021,7 @@ button:disabled {
   border-top: 1px solid var(--line);
   padding-top: 6px;
   font-weight: 800;
+  animation: list-item-enter 260ms var(--ease-out) both;
 }
 
 .awaiting-event {
@@ -996,6 +1072,7 @@ button:disabled {
   margin: 0 auto;
   padding: clamp(20px, 4vw, 40px);
   overflow: hidden;
+  animation: result-enter 560ms var(--ease-out) both;
 }
 
 .result-card h1 {
@@ -1031,6 +1108,66 @@ button:disabled {
   font-weight: 950;
   min-width: 0;
   overflow-wrap: anywhere;
+  animation: rise-in 360ms var(--ease-out) both;
+}
+
+.result-stats span:nth-child(2) { animation-delay: 40ms; }
+.result-stats span:nth-child(3) { animation-delay: 80ms; }
+.result-stats span:nth-child(4) { animation-delay: 120ms; }
+.result-stats span:nth-child(5) { animation-delay: 160ms; }
+
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(8px); }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); }
+}
+
+@keyframes preview-enter {
+  from { opacity: 0; transform: translateY(20px) rotate(0.4deg) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) rotate(0.4deg) scale(1); }
+}
+
+@keyframes card-reveal {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@keyframes list-item-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+}
+
+@keyframes slot-filled {
+  0% { opacity: 0.55; transform: scale(0.9); }
+  65% { transform: scale(1.035); }
+}
+
+@keyframes value-pop {
+  from { opacity: 0; transform: translateY(4px) scale(0.9); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes dialog-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+}
+
+@keyframes result-enter {
+  from { opacity: 0; transform: translateY(18px) scale(0.99); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .final-xv {

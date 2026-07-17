@@ -21,7 +21,7 @@ export const PlayerList = ({ squad, team, drawLocked, onSelect }: PlayerListProp
       </span>
     </div>
     {squad && drawLocked && <p className="draw-lock">One legend taken from this draw. Roll again for the next pick.</p>}
-    <div className="player-list">
+    <div className="player-list" key={squad?.id ?? 'empty-squad'}>
       {squad ? (
         squad.players.map((player) => {
           const positionLocked = Boolean(team.slots[player.position])

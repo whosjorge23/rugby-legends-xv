@@ -28,7 +28,7 @@ export const RollPanel = ({
     <section className="panel roll-panel">
       <p className="panel-kicker">Drawn</p>
       {squad ? (
-        <div className="drawn-card">
+        <div className="drawn-card" key={squad.id}>
           <span className="drawn-flag">{squad.flag}</span>
           <h2>{squad.country}</h2>
           <p>
@@ -36,7 +36,7 @@ export const RollPanel = ({
           </p>
         </div>
       ) : (
-        <div className="drawn-card empty">
+        <div className="drawn-card empty" key="empty-draw">
           <span className="drawn-flag">?</span>
           <h2>No squad yet</h2>
           <p>Roll to reveal a historical national team.</p>

@@ -13,7 +13,7 @@ type RatingPanelProps = {
 const RatingLine = ({ label, value }: { label: string; value: number }) => (
   <div className="rating-line">
     <span>{label}</span>
-    <strong>{value || '-'}</strong>
+    <strong key={value}>{value || '-'}</strong>
   </div>
 )
 
