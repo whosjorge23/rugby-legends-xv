@@ -502,133 +502,6 @@ button:disabled {
   gap: 18px;
 }
 
-.lineup-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-  display: grid;
-  place-items: center;
-  background: rgba(21, 50, 72, 0.54);
-  padding: 18px;
-  animation: fade-in 180ms ease-out both;
-}
-
-.lineup-dialog {
-  width: min(1080px, 100%);
-  max-height: min(880px, calc(100vh - 36px));
-  overflow: auto;
-  border: 1px solid rgba(21, 50, 72, 0.18);
-  border-radius: 18px;
-  background: var(--paper);
-  box-shadow: 0 28px 80px rgba(21, 50, 72, 0.34);
-  padding: 22px;
-  animation: dialog-enter 320ms var(--ease-out) both;
-}
-
-.lineup-dialog-header {
-  display: flex;
-  align-items: start;
-  justify-content: space-between;
-  gap: 18px;
-  margin-bottom: 18px;
-}
-
-.lineup-dialog-header h2 {
-  margin: 0;
-  color: var(--navy);
-  font-size: clamp(2.1rem, 5vw, 4.6rem);
-  line-height: 0.92;
-  text-transform: uppercase;
-}
-
-.lineup-dialog-header p:last-child {
-  margin: 8px 0 0;
-  color: var(--muted);
-  font-weight: 850;
-}
-
-.lineup-columns {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.lineup-team {
-  border: 1px solid rgba(21, 50, 72, 0.14);
-  border-radius: 14px;
-  background: #f4f8f1;
-  padding: 14px;
-}
-
-.lineup-team-title {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-}
-
-.lineup-team-title strong {
-  min-width: 0;
-  color: var(--navy);
-  font-size: 1.04rem;
-  font-weight: 950;
-  overflow-wrap: anywhere;
-}
-
-.lineup-list {
-  display: grid;
-  gap: 7px;
-}
-
-.lineup-row {
-  display: grid;
-  grid-template-columns: 34px minmax(0, 1fr);
-  gap: 10px;
-  align-items: center;
-  border-top: 1px solid rgba(21, 50, 72, 0.12);
-  padding-top: 7px;
-}
-
-.lineup-row > span {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  background: var(--navy);
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 950;
-}
-
-.lineup-row strong,
-.lineup-row em {
-  display: block;
-  min-width: 0;
-  overflow-wrap: anywhere;
-}
-
-.lineup-row strong {
-  color: var(--black);
-  font-size: 0.92rem;
-  line-height: 1.1;
-}
-
-.lineup-row em {
-  margin-top: 2px;
-  color: var(--muted);
-  font-size: 0.76rem;
-  font-style: normal;
-  font-weight: 850;
-}
-
-.lineup-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-  margin-top: 18px;
-}
-
 .live-match-panel {
   overflow: hidden;
   border: 1px solid rgba(21, 50, 72, 0.16);
@@ -781,6 +654,40 @@ button:disabled {
   font-size: 0.7rem;
   font-weight: 950;
   transform: translate(-50%, -50%);
+}
+
+.player-number {
+  position: relative;
+  z-index: 2;
+}
+
+.player-name-tag {
+  position: absolute;
+  top: 50%;
+  max-width: 150px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 999px;
+  background: rgba(251, 253, 249, 0.9);
+  box-shadow: 0 8px 18px rgba(23, 35, 33, 0.18);
+  color: var(--navy);
+  font-size: 0.68rem;
+  font-weight: 950;
+  line-height: 1;
+  padding: 6px 8px;
+  text-overflow: ellipsis;
+  text-shadow: none;
+  transform: translateY(-50%);
+  white-space: nowrap;
+}
+
+.user-dot .player-name-tag {
+  left: calc(100% + 7px);
+}
+
+.opponent-dot .player-name-tag {
+  right: calc(100% + 7px);
+  text-align: right;
 }
 
 .live-pitch.is-running .player-dot {
@@ -1203,10 +1110,6 @@ button:disabled {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
-  .lineup-columns {
-    grid-template-columns: 1fr;
-  }
-
   .live-pitch {
     min-height: 500px;
   }
@@ -1222,30 +1125,9 @@ button:disabled {
 
 @media (max-width: 680px) {
   .site-header,
-  .page-title,
-  .lineup-dialog-header {
+  .page-title {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .lineup-backdrop {
-    align-items: stretch;
-    padding: 10px;
-  }
-
-  .lineup-dialog {
-    max-height: calc(100vh - 20px);
-    border-radius: 16px;
-    padding: 16px;
-  }
-
-  .lineup-actions {
-    flex-direction: column-reverse;
-  }
-
-  .lineup-actions .button,
-  .lineup-dialog-header .button {
-    width: 100%;
   }
 
   .home-layout {
@@ -1308,6 +1190,12 @@ button:disabled {
     width: 24px;
     height: 24px;
     font-size: 0.62rem;
+  }
+
+  .player-name-tag {
+    max-width: 108px;
+    font-size: 0.58rem;
+    padding: 5px 7px;
   }
 
   .result-actions .button {

@@ -142,6 +142,7 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
     : undefined
   const activeTarget = eventTarget(activeEvent, activePlayer?.y)
   const isTryPhase = activeEvent?.type === 'TRY'
+  const showPlayerNames = !isSimulating && visibleEventCount === 0
   const eventKey = activeEvent
     ? `${match.id}-${visibleEventCount}-${activeEvent.minute}-${activeEvent.playerName}-${activeEvent.type}`
     : match.id
@@ -204,7 +205,8 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
               style={style}
               title={player.name}
             >
-              <span>{player.number}</span>
+              <span className="player-number">{player.number}</span>
+              {showPlayerNames && <span className="player-name-tag">{player.name}</span>}
             </span>
           )
         })}

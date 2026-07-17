@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react'
 import { MatchCard } from '../components/MatchCard'
 import { Button } from '../components/Button'
 import { LiveMatchPitch } from '../components/LiveMatchPitch'
-import { LineupDialog } from '../components/LineupDialog'
 import type { SelectedTeam, SimulatedMatch } from '../types/rugby'
 
 type SimulationPageProps = {
@@ -18,7 +17,6 @@ export const SimulationPage = ({ matches, team, onResult, onReplay }: Simulation
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
   const [visibleEventCounts, setVisibleEventCounts] = useState<number[]>([])
   const [isSimulating, setIsSimulating] = useState(false)
-  const [isLineupDialogOpen, setIsLineupDialogOpen] = useState(false)
   const currentMatch = matches[currentMatchIndex]
   const currentVisibleEvents = visibleEventCounts[currentMatchIndex] ?? 0
   const currentMatchComplete = currentMatch ? currentVisibleEvents >= currentMatch.events.length : false
@@ -30,7 +28,6 @@ export const SimulationPage = ({ matches, team, onResult, onReplay }: Simulation
     setCurrentMatchIndex(0)
     setVisibleEventCounts(matches.map(() => 0))
     setIsSimulating(false)
-    setIsLineupDialogOpen(false)
   }, [matches])
 
   useEffect(() => {
@@ -62,13 +59,7 @@ export const SimulationPage = ({ matches, team, onResult, onReplay }: Simulation
 
   const goToNextMatch = () => {
     setIsSimulating(false)
-    setIsLineupDialogOpen(false)
     setCurrentMatchIndex((index) => Math.min(index + 1, matches.length - 1))
-  }
-
-  const startMatch = () => {
-    setIsLineupDialogOpen(false)
-    setIsSimulating(true)
   }
 
   return (
@@ -83,7 +74,7 @@ export const SimulationPage = ({ matches, team, onResult, onReplay }: Simulation
             Replay
           </Button>
           {!currentMatchComplete && (
-            <Button onClick={() => setIsLineupDialogOpen(true)} disabled={isSimulating}>
+            <Button onClick={() => setIsSimulating(true)} disabled={isSimulating}>
               {isSimulating ? 'Simulating...' : 'Simulate Match'}
             </Button>
           )}
@@ -108,14 +99,6 @@ export const SimulationPage = ({ matches, team, onResult, onReplay }: Simulation
           />
         ))}
       </section>
-      {currentMatch && isLineupDialogOpen && (
-        <LineupDialog
-          match={currentMatch}
-          team={team}
-          onClose={() => setIsLineupDialogOpen(false)}
-          onStart={startMatch}
-        />
-      )}
     </main>
   )
 }
