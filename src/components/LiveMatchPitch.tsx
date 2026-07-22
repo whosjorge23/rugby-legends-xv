@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 import { positions } from '../data/positions'
+import { activeSinBinCardsAt, SIN_BIN_MINUTES } from '../logic/sinBin'
 import type { MatchEvent, Player, SelectedTeam, SimulatedMatch } from '../types/rugby'
 
 type LiveMatchPitchProps = {
@@ -125,9 +126,18 @@ const eventTarget = (event: MatchEvent | undefined, scorerY?: number) => {
   const tryX = attackingRight ? 91 : 9
   const postX = attackingRight ? 84 : 16
   const touchline = scorerY ?? 50
+  const isKick = event.type === 'CONVERSION' || event.type === 'PENALTY' || event.type === 'DROP_GOAL'
 
   if (event.type === 'TRY') return { x: tryX, y: touchline }
   if (event.type === 'YELLOW_CARD') return { x: 50, y: 8 }
+  if (isKick && event.successful === false) {
+    const missDirection = [...`${event.minute}-${event.playerName}`].reduce(
+      (total, character) => total + character.charCodeAt(0),
+      0,
+    ) % 2
+
+    return { x: postX, y: missDirection === 0 ? 34 : 66 }
+  }
 
   return { x: postX, y: 50 }
 }
@@ -136,9 +146,14 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
   if (!match) return null
 
   const activeEvent = visibleEventCount > 0 ? match.events[visibleEventCount - 1] : undefined
-  const players = [...toUserDots(team), ...toOpponentDots(match)]
+  const allPlayers = [...toUserDots(team), ...toOpponentDots(match)]
+  const currentMinute = visibleEventCount >= match.events.length ? 80 : activeEvent?.minute ?? 0
+  const activeSinBins = activeSinBinCardsAt(match.events.slice(0, visibleEventCount), currentMinute)
+  const players = allPlayers.filter(
+    (player) => !activeSinBins.some((card) => card.team === player.team && card.playerName === player.name),
+  )
   const activePlayer = activeEvent
-    ? players.find((player) => activeEvent.team === player.team && activeEvent.playerName === player.name)
+    ? allPlayers.find((player) => activeEvent.team === player.team && activeEvent.playerName === player.name)
     : undefined
   const activeTarget = eventTarget(activeEvent, activePlayer?.y)
   const isTryPhase = activeEvent?.type === 'TRY'
@@ -210,8 +225,12 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
             </span>
           )
         })}
-        {activeEvent && (
-          <div className="ball-marker" key={eventKey} style={{ left: `${activeTarget.x}%`, top: `${activeTarget.y}%` }} />
+        {activeEvent && activeEvent.type !== 'YELLOW_CARD' && (
+          <div
+            className={`ball-marker ${activeEvent.successful === false ? 'is-missed' : ''}`}
+            key={eventKey}
+            style={{ left: `${activeTarget.x}%`, top: `${activeTarget.y}%` }}
+          />
         )}
       </div>
       <div className="live-event-strip">
@@ -225,6 +244,15 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
           <span>Kick-off ready</span>
         )}
       </div>
+      {activeSinBins.length > 0 && (
+        <div className="sin-bin-strip" aria-live="polite">
+          {activeSinBins.map((card) => (
+            <span key={`${card.team}-${card.playerName}-${card.minute}`}>
+              <b>Yellow card</b> {card.playerName} · sin bin until {Math.min(80, card.minute + SIN_BIN_MINUTES)}'
+            </span>
+          ))}
+        </div>
+      )}
     </section>
   )
 }

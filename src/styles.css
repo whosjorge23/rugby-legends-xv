@@ -936,6 +936,12 @@ button:disabled {
   animation: ball-pop 1400ms ease both;
 }
 
+.ball-marker.is-missed {
+  background: #f6d36b;
+  box-shadow: 0 0 0 8px rgba(215, 53, 42, 0.3), 0 0 22px rgba(215, 53, 42, 0.46);
+  animation: ball-miss 1400ms ease both;
+}
+
 .live-event-strip {
   display: flex;
   flex-wrap: wrap;
@@ -958,6 +964,28 @@ button:disabled {
 .live-event-strip em {
   color: var(--navy);
   font-style: normal;
+}
+
+.sin-bin-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.sin-bin-strip span {
+  border: 1px solid rgba(228, 184, 76, 0.7);
+  border-radius: 999px;
+  background: #fff5c7;
+  color: var(--navy);
+  padding: 7px 10px;
+  font-size: 0.75rem;
+  font-weight: 850;
+}
+
+.sin-bin-strip b {
+  color: #8b6500;
+  text-transform: uppercase;
 }
 
 @keyframes player-line-advance {
@@ -1060,6 +1088,23 @@ button:disabled {
 
   100% {
     opacity: 0.78;
+    transform: translate(-50%, -50%) rotate(-18deg) scale(1);
+  }
+}
+
+@keyframes ball-miss {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) rotate(-18deg) scale(0.45);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translate(-50%, -50%) rotate(-18deg) scale(1.35);
+  }
+
+  100% {
+    opacity: 0.92;
     transform: translate(-50%, -50%) rotate(-18deg) scale(1);
   }
 }

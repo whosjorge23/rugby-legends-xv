@@ -2,6 +2,7 @@ import { squads } from '../data/squads'
 import { applyTactic } from '../data/tactics'
 import { calculateSquadRatings, selectedPlayers } from './ratings'
 import { pickOne, randomInt, shuffle } from './random'
+import { respectSinBins } from './sinBin'
 import type {
   MatchEvent,
   MatchStage,
@@ -155,7 +156,7 @@ const makeEvents = (
   addYellowCard(events, userPlayers, 'user', userDiscipline)
   addYellowCard(events, opponent.players, 'opponent', opponentRatings.discipline)
 
-  return events.sort((left, right) => left.minute - right.minute)
+  return respectSinBins(events, { user: userPlayers, opponent: opponent.players })
 }
 
 const resultFor = (userScore: number, opponentScore: number): SimulatedMatch['result'] => {
