@@ -2,6 +2,7 @@ import { Header } from './components/Header'
 import { useGameState } from './hooks/useGameState'
 import { BuildPage } from './pages/BuildPage'
 import { HomePage } from './pages/HomePage'
+import { ManagerPage } from './pages/ManagerPage'
 import { ResultPage } from './pages/ResultPage'
 import { SimulationPage } from './pages/SimulationPage'
 
@@ -26,14 +27,27 @@ export const App = () => {
           onRerollTeam={game.rerollTeam}
           onRerollCup={game.rerollCup}
           onSelectPlayer={game.selectPlayer}
-          onSimulate={game.runSimulation}
+          onSimulate={game.beginCup}
+        />
+      )}
+      {game.view === 'manager' && game.nextOpponent && game.nextStage && game.matchdaySetup && (
+        <ManagerPage
+          opponent={game.nextOpponent}
+          stage={game.nextStage}
+          matchNumber={game.matches.length + 1}
+          team={game.team}
+          ratings={game.ratings}
+          setup={game.matchdaySetup}
+          onSetupChange={game.updateMatchdaySetup}
+          onPlay={game.playCurrentMatch}
+          onRestart={game.replay}
         />
       )}
       {game.view === 'simulation' && (
         <SimulationPage
           matches={game.matches}
           team={game.team}
-          onResult={() => game.setView('result')}
+          onContinue={game.finishMatch}
           onReplay={game.replay}
         />
       )}

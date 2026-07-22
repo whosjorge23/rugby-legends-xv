@@ -59,11 +59,20 @@ export type SelectedTeam = {
 
 export type MatchStage = 'Groups' | 'Quarter-final' | 'Semi-final' | 'Final'
 
+export type MatchTactic = 'run-wide' | 'rush-defence' | 'kick-for-territory'
+
+export type MatchdaySetup = {
+  captainId: string
+  kickerId: string
+  tactic: MatchTactic
+}
+
 export type MatchEvent = {
   minute: number
   type: 'TRY' | 'CONVERSION' | 'PENALTY' | 'DROP_GOAL' | 'YELLOW_CARD'
   playerName: string
   team: 'user' | 'opponent'
+  successful?: boolean
 }
 
 export type SimulatedMatch = {
@@ -74,6 +83,10 @@ export type SimulatedMatch = {
   opponentScore: number
   result: 'win' | 'loss' | 'draw'
   events: MatchEvent[]
+  setup: MatchdaySetup
+  captainName: string
+  kickerName: string
+  standoutPlayerName: string
 }
 
 export type TeamRatings = {

@@ -1,5 +1,5 @@
 import { positions } from '../data/positions'
-import type { Player, SelectedTeam, TeamRatings } from '../types/rugby'
+import type { Player, SelectedTeam, Squad, TeamRatings } from '../types/rugby'
 
 const average = (players: Player[], key: keyof TeamRatings) => {
   if (players.length === 0) return 0
@@ -21,3 +21,11 @@ export const calculateRatings = (team: SelectedTeam): TeamRatings => {
 }
 
 export const completionCount = (team: SelectedTeam) => selectedPlayers(team).length
+
+export const calculateSquadRatings = (squad: Squad): TeamRatings => ({
+  overall: average(squad.players, 'overall'),
+  attack: average(squad.players, 'attack'),
+  defense: average(squad.players, 'defense'),
+  kicking: average(squad.players, 'kicking'),
+  discipline: average(squad.players, 'discipline'),
+})

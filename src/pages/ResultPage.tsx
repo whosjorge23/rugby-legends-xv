@@ -34,6 +34,7 @@ export const ResultPage = ({ matches, team, ratings, onReplay, onBuildAnother }:
       summary={summarize(matches)}
       team={team}
       ratings={ratings}
+      matches={matches}
       onReplay={onReplay}
       onBuildAnother={onBuildAnother}
     />

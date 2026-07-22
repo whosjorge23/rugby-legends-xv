@@ -218,7 +218,7 @@ export const LiveMatchPitch = ({ match, team, visibleEventCount, isSimulating }:
         {activeEvent ? (
           <>
             <span>{activeEvent.minute}'</span>
-            <strong>{eventLabel[activeEvent.type]}</strong>
+            <strong>{eventLabel[activeEvent.type]}{activeEvent.successful === false ? ' MISSED' : ''}</strong>
             <em>{activeEvent.playerName}</em>
           </>
         ) : (

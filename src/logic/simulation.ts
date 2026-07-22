@@ -1,9 +1,20 @@
 import { squads } from '../data/squads'
-import { selectedPlayers } from './ratings'
+import { applyTactic } from '../data/tactics'
+import { calculateSquadRatings, selectedPlayers } from './ratings'
 import { pickOne, randomInt, shuffle } from './random'
-import type { MatchEvent, MatchStage, SelectedTeam, SimulatedMatch, Squad, TeamRatings } from '../types/rugby'
+import type {
+  MatchEvent,
+  MatchStage,
+  MatchdaySetup,
+  Player,
+  SelectedTeam,
+  SimulatedMatch,
+  Squad,
+  TeamRatings,
+} from '../types/rugby'
 
-const stages: MatchStage[] = ['Groups', 'Groups', 'Groups', 'Quarter-final', 'Semi-final', 'Final']
+export const cupStages: MatchStage[] = ['Groups', 'Groups', 'Groups', 'Quarter-final', 'Semi-final', 'Final']
+
 const scoringEventPoints: Record<Exclude<MatchEvent['type'], 'YELLOW_CARD'>, number> = {
   TRY: 5,
   CONVERSION: 2,
@@ -11,10 +22,12 @@ const scoringEventPoints: Record<Exclude<MatchEvent['type'], 'YELLOW_CARD'>, num
   DROP_GOAL: 3,
 }
 
+const clamp = (value: number, minimum: number, maximum: number) => Math.max(minimum, Math.min(maximum, value))
+
 const scoreEvents = (events: MatchEvent[]) =>
   events.reduce(
     (score, event) => {
-      const points = event.type === 'YELLOW_CARD' ? 0 : scoringEventPoints[event.type]
+      const points = event.type === 'YELLOW_CARD' || event.successful === false ? 0 : scoringEventPoints[event.type]
       return event.team === 'user'
         ? { ...score, userScore: score.userScore + points }
         : { ...score, opponentScore: score.opponentScore + points }
@@ -22,48 +35,52 @@ const scoreEvents = (events: MatchEvent[]) =>
     { userScore: 0, opponentScore: 0 },
   )
 
-const scoringProfile = (strength: number) => {
-  const tries = Math.max(0, Math.round((strength - 72) / 10) + randomInt(-1, 2))
-  const conversions = randomInt(Math.max(0, tries - 2), tries)
-  const penalties = randomInt(1, 5)
-  const dropGoals = Math.random() > 0.78 ? 1 : 0
+const kickSucceeds = (kicking: number, difficulty = 0) =>
+  Math.random() < clamp(0.42 + (kicking - 55) * 0.012 - difficulty, 0.35, 0.94)
 
-  return { conversions, dropGoals, penalties, tries }
+const scoringProfile = (
+  attack: number,
+  oppositionDefense: number,
+  oppositionDiscipline: number,
+  territoryBonus = false,
+) => {
+  const advantage = attack - oppositionDefense
+  const tries = Math.max(0, Math.round(2.3 + advantage / 9) + randomInt(-1, 1) - (territoryBonus ? 1 : 0))
+  const penaltyPressure = oppositionDiscipline < 84 ? 1 : 0
+  const penalties = Math.max(1, randomInt(1, 3) + penaltyPressure + (territoryBonus ? 1 : 0))
+  const dropGoals = Math.random() > 0.86 ? 1 : 0
+
+  return { dropGoals, penalties, tries }
 }
 
 const makeTeamScoringEvents = (
-  players: { name: string }[],
+  players: Player[],
   profile: ReturnType<typeof scoringProfile>,
   eventTeam: MatchEvent['team'],
+  kicker: Player,
+  effectiveKicking: number,
 ): MatchEvent[] => {
   const events: MatchEvent[] = []
   const tryMinutes = Array.from({ length: profile.tries }, () => randomInt(6, 76)).sort((a, b) => a - b)
 
-  tryMinutes.forEach((minute, index) => {
-    const tryScorer = pickOne(players)
+  tryMinutes.forEach((minute) => {
+    events.push({ minute, type: 'TRY', playerName: pickOne(players).name, team: eventTeam })
     events.push({
-      minute,
-      type: 'TRY',
-      playerName: tryScorer.name,
+      minute: Math.min(80, minute + 1),
+      type: 'CONVERSION',
+      playerName: kicker.name,
       team: eventTeam,
+      successful: kickSucceeds(effectiveKicking, 0.04),
     })
-
-    if (index < profile.conversions) {
-      events.push({
-        minute: Math.min(80, minute + 1),
-        type: 'CONVERSION',
-        playerName: pickOne(players).name,
-        team: eventTeam,
-      })
-    }
   })
 
   Array.from({ length: profile.penalties }, () => {
     events.push({
       minute: randomInt(5, 78),
       type: 'PENALTY',
-      playerName: pickOne(players).name,
+      playerName: kicker.name,
       team: eventTeam,
+      successful: kickSucceeds(effectiveKicking),
     })
   })
 
@@ -71,33 +88,74 @@ const makeTeamScoringEvents = (
     events.push({
       minute: randomInt(18, 79),
       type: 'DROP_GOAL',
-      playerName: pickOne(players).name,
+      playerName: kicker.name,
       team: eventTeam,
+      successful: kickSucceeds(effectiveKicking, 0.12),
     })
   })
 
   return events
 }
 
-const makeEvents = (team: SelectedTeam, opponent: Squad, userStrength: number, opponentStrength: number): MatchEvent[] => {
-  const userPlayers = selectedPlayers(team)
-  const scoringEvents: MatchEvent[] = [
-    ...makeTeamScoringEvents(userPlayers, scoringProfile(userStrength), 'user'),
-    ...makeTeamScoringEvents(opponent.players, scoringProfile(opponentStrength), 'opponent'),
-  ]
-
-  const yellowCards = Array.from({ length: randomInt(0, 2) }, () => {
-    const isUser = Math.random() < 0.5
-
-    return {
+const addYellowCard = (
+  events: MatchEvent[],
+  players: Player[],
+  team: MatchEvent['team'],
+  discipline: number,
+) => {
+  const cardChance = clamp(0.12 + (86 - discipline) * 0.018, 0.02, 0.42)
+  if (Math.random() < cardChance) {
+    events.push({
       minute: randomInt(12, 76),
       type: 'YELLOW_CARD',
-      playerName: (isUser ? pickOne(userPlayers) : pickOne(opponent.players)).name,
-      team: isUser ? 'user' : 'opponent',
-    } satisfies MatchEvent
-  })
+      playerName: pickOne(players).name,
+      team,
+    })
+  }
+}
 
-  return [...scoringEvents, ...yellowCards].sort((a, b) => a.minute - b.minute)
+const leadershipBonusFor = (captain: Player) => clamp(Math.round(((captain.leadership ?? 80) - 80) / 4), 0, 4)
+
+const makeEvents = (
+  team: SelectedTeam,
+  opponent: Squad,
+  userRatings: TeamRatings,
+  opponentRatings: TeamRatings,
+  setup: MatchdaySetup,
+): MatchEvent[] => {
+  const userPlayers = selectedPlayers(team)
+  const captain = userPlayers.find((player) => player.id === setup.captainId) ?? userPlayers[0]
+  const userKicker = userPlayers.find((player) => player.id === setup.kickerId) ?? userPlayers[0]
+  const opponentKicker = [...opponent.players].sort((left, right) => right.kicking - left.kicking)[0]
+  const adjustedUserRatings = applyTactic(userRatings, setup.tactic)
+  const userDiscipline = clamp(adjustedUserRatings.discipline + leadershipBonusFor(captain), 1, 99)
+  const territoryBonus = setup.tactic === 'kick-for-territory'
+  const events: MatchEvent[] = [
+    ...makeTeamScoringEvents(
+      userPlayers,
+      scoringProfile(
+        adjustedUserRatings.attack,
+        opponentRatings.defense,
+        opponentRatings.discipline,
+        territoryBonus,
+      ),
+      'user',
+      userKicker,
+      Math.round((userKicker.kicking * 2 + adjustedUserRatings.kicking) / 3),
+    ),
+    ...makeTeamScoringEvents(
+      opponent.players,
+      scoringProfile(opponentRatings.attack, adjustedUserRatings.defense, userDiscipline),
+      'opponent',
+      opponentKicker,
+      Math.round((opponentKicker.kicking * 2 + opponentRatings.kicking) / 3),
+    ),
+  ]
+
+  addYellowCard(events, userPlayers, 'user', userDiscipline)
+  addYellowCard(events, opponent.players, 'opponent', opponentRatings.discipline)
+
+  return events.sort((left, right) => left.minute - right.minute)
 }
 
 const resultFor = (userScore: number, opponentScore: number): SimulatedMatch['result'] => {
@@ -106,51 +164,67 @@ const resultFor = (userScore: number, opponentScore: number): SimulatedMatch['re
   return 'draw'
 }
 
-export const simulateCup = (team: SelectedTeam, ratings: TeamRatings, currentSquad?: Squad): SimulatedMatch[] => {
-  const opponents = shuffle(squads.filter((squad) => squad.id !== currentSquad?.id)).slice(0, stages.length)
-  const matches: SimulatedMatch[] = []
+const standoutFor = (events: MatchEvent[], fallback: Player) => {
+  const contributions = new Map<string, number>()
 
-  for (const [index, stage] of stages.entries()) {
-    const opponent = opponents[index]
-    const userStrength = ratings.overall + randomInt(-10, 10)
-    const opponentStrength = opponent.overall + randomInt(-10, 10)
-    let events = makeEvents(team, opponent, userStrength, opponentStrength)
-    let { userScore, opponentScore } = scoreEvents(events)
+  events
+    .filter((event) => event.team === 'user' && event.type !== 'YELLOW_CARD' && event.successful !== false)
+    .forEach((event) => {
+      const points = scoringEventPoints[event.type as Exclude<MatchEvent['type'], 'YELLOW_CARD'>]
+      contributions.set(event.playerName, (contributions.get(event.playerName) ?? 0) + points)
+    })
 
-    if (stage !== 'Groups' && userScore === opponentScore) {
-      const penaltyTeam = randomInt(0, 1) ? 'user' : 'opponent'
-      const penaltyPlayers = penaltyTeam === 'user' ? selectedPlayers(team) : opponent.players
+  return [...contributions.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? fallback.name
+}
 
-      const tieBreaker: MatchEvent = {
-        minute: 80,
-        type: 'PENALTY',
-        playerName: pickOne(penaltyPlayers).name,
-        team: penaltyTeam,
-      }
+export const createCupSchedule = (excludedSquad?: Squad): Squad[] =>
+  shuffle(squads.filter((squad) => squad.id !== excludedSquad?.id)).slice(0, cupStages.length)
 
-      events = [
-        ...events,
-        tieBreaker,
-      ].sort((a, b) => a.minute - b.minute)
-      ;({ userScore, opponentScore } = scoreEvents(events))
+export const simulateMatch = (
+  team: SelectedTeam,
+  ratings: TeamRatings,
+  opponent: Squad,
+  stage: MatchStage,
+  setup: MatchdaySetup,
+  matchIndex: number,
+): SimulatedMatch => {
+  const players = selectedPlayers(team)
+  const opponentRatings = calculateSquadRatings(opponent)
+  let events = makeEvents(team, opponent, ratings, opponentRatings, setup)
+  let { userScore, opponentScore } = scoreEvents(events)
+
+  if (stage !== 'Groups' && userScore === opponentScore) {
+    const penaltyTeam = randomInt(0, 1) ? 'user' : 'opponent'
+    const penaltyPlayers = penaltyTeam === 'user' ? players : opponent.players
+    const namedKicker = penaltyTeam === 'user'
+      ? players.find((player) => player.id === setup.kickerId)
+      : [...opponent.players].sort((left, right) => right.kicking - left.kicking)[0]
+    const tieBreaker: MatchEvent = {
+      minute: 80,
+      type: 'PENALTY',
+      playerName: namedKicker?.name ?? pickOne(penaltyPlayers).name,
+      team: penaltyTeam,
+      successful: true,
     }
 
-    const match: SimulatedMatch = {
-      id: `${stage}-${opponent.id}-${index}`,
-      stage,
-      opponent,
-      userScore,
-      opponentScore,
-      result: resultFor(userScore, opponentScore),
-      events,
-    }
-
-    matches.push(match)
-
-    if (stage !== 'Groups' && match.result !== 'win') {
-      break
-    }
+    events = [...events, tieBreaker].sort((left, right) => left.minute - right.minute)
+    ;({ userScore, opponentScore } = scoreEvents(events))
   }
 
-  return matches
+  const captain = players.find((player) => player.id === setup.captainId) ?? players[0]
+  const kicker = players.find((player) => player.id === setup.kickerId) ?? players[0]
+
+  return {
+    id: `${stage}-${opponent.id}-${matchIndex}`,
+    stage,
+    opponent,
+    userScore,
+    opponentScore,
+    result: resultFor(userScore, opponentScore),
+    events,
+    setup,
+    captainName: captain.name,
+    kickerName: kicker.name,
+    standoutPlayerName: standoutFor(events, captain),
+  }
 }

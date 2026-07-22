@@ -49,6 +49,7 @@ button:disabled {
 /* Motion is intentionally limited to compositor-friendly opacity and transforms. */
 .home-layout,
 .build-layout,
+.manager-page,
 .simulation-page,
 .result-page {
   animation: page-enter var(--motion-base) var(--ease-out) both;
@@ -484,8 +485,206 @@ button:disabled {
 }
 
 .simulation-page,
+.manager-page,
 .result-page {
   padding: 28px clamp(16px, 4vw, 48px) 48px;
+}
+
+.manager-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 0.72fr) minmax(480px, 1.28fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.opponent-card,
+.manager-controls {
+  border: 1px solid rgba(21, 50, 72, 0.16);
+  border-radius: 18px;
+  background: var(--paper);
+  box-shadow: 0 18px 42px var(--shadow);
+  padding: clamp(18px, 3vw, 28px);
+  animation: rise-in var(--motion-base) var(--ease-out) both;
+}
+
+.manager-controls {
+  display: grid;
+  gap: 22px;
+  animation-delay: 70ms;
+}
+
+.manager-controls h2,
+.opponent-identity h2 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+}
+
+.opponent-identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 20px;
+}
+
+.opponent-identity > span {
+  font-size: clamp(3.5rem, 8vw, 6rem);
+  line-height: 1;
+}
+
+.opponent-identity p {
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.scouting-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.scouting-stat {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #eef8f4;
+  padding: 13px;
+}
+
+.scouting-stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.scouting-stat strong {
+  color: var(--navy);
+  font-size: 1.8rem;
+}
+
+.versus-ratings {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border-radius: 14px;
+  background: var(--navy);
+  color: #fff;
+  margin-top: 16px;
+  padding: 14px;
+  font-weight: 950;
+}
+
+.versus-ratings strong {
+  color: var(--gold);
+}
+
+.role-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.role-control {
+  display: grid;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f4faf6;
+  padding: 14px;
+}
+
+.role-control > span,
+.tactic-picker legend {
+  color: var(--navy);
+  font-size: 0.78rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.role-control select {
+  width: 100%;
+  min-height: 46px;
+  border: 1px solid rgba(21, 50, 72, 0.28);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--black);
+  padding: 9px 10px;
+  font-weight: 850;
+}
+
+.role-control small {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.tactic-picker {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.tactic-picker legend {
+  margin-bottom: 10px;
+}
+
+.tactic-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.tactic-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 180px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--black);
+  padding: 15px;
+  text-align: left;
+  transition: border-color var(--motion-fast) ease, transform var(--motion-fast) ease, background var(--motion-fast) ease;
+}
+
+.tactic-card:hover {
+  transform: translateY(-2px);
+}
+
+.tactic-card.is-selected {
+  border-color: var(--red);
+  background: #fff0ed;
+  box-shadow: 0 12px 26px rgba(215, 53, 42, 0.13);
+}
+
+.tactic-card strong {
+  color: var(--navy);
+  font-size: 1.05rem;
+  text-transform: uppercase;
+}
+
+.tactic-card span {
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.tactic-card em {
+  align-self: end;
+  color: var(--red);
+  font-size: 0.76rem;
+  font-style: normal;
+  font-weight: 950;
+}
+
+.play-match-button {
+  width: 100%;
 }
 
 .page-title {
@@ -974,6 +1173,23 @@ button:disabled {
   color: var(--red);
 }
 
+.match-plan-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  margin-top: 12px;
+  padding-top: 10px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.match-plan-summary strong {
+  color: var(--navy);
+}
+
 .result-card {
   max-width: 920px;
   margin: 0 auto;
@@ -1022,6 +1238,35 @@ button:disabled {
 .result-stats span:nth-child(3) { animation-delay: 80ms; }
 .result-stats span:nth-child(4) { animation-delay: 120ms; }
 .result-stats span:nth-child(5) { animation-delay: 160ms; }
+
+.manager-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  margin: 22px 0;
+  padding-top: 18px;
+}
+
+.manager-summary div {
+  display: grid;
+  gap: 3px;
+  border-radius: 12px;
+  background: #f8f4dc;
+  padding: 12px;
+}
+
+.manager-summary span {
+  color: var(--muted);
+  font-size: 0.7rem;
+  font-weight: 950;
+  text-transform: uppercase;
+}
+
+.manager-summary strong {
+  color: var(--navy);
+  overflow-wrap: anywhere;
+}
 
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(8px); }
@@ -1097,7 +1342,8 @@ button:disabled {
 
 @media (max-width: 1120px) {
   .home-layout,
-  .build-layout {
+  .build-layout,
+  .manager-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1106,7 +1352,8 @@ button:disabled {
   }
 
   .match-grid,
-  .result-stats {
+  .result-stats,
+  .tactic-grid {
     grid-template-columns: repeat(2, minmax(220px, 1fr));
   }
 
@@ -1139,6 +1386,10 @@ button:disabled {
     font-size: clamp(3.6rem, 20vw, 6rem);
   }
 
+  .manager-page .page-title h1 {
+    font-size: clamp(3.2rem, 16vw, 5rem);
+  }
+
   .result-page {
     padding: 18px 12px 36px;
   }
@@ -1169,7 +1420,10 @@ button:disabled {
   }
 
   .match-grid,
-  .result-stats {
+  .result-stats,
+  .role-grid,
+  .tactic-grid,
+  .manager-summary {
     grid-template-columns: 1fr;
   }
 
@@ -1212,6 +1466,11 @@ button:disabled {
 
   .final-row {
     grid-template-columns: 32px minmax(0, 1fr);
+  }
+
+
+  .match-plan-summary {
+    grid-template-columns: 1fr;
   }
 
   .final-row em {

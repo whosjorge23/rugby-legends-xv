@@ -1,3 +1,4 @@
+import { tacticById } from '../data/tactics'
 import type { SimulatedMatch } from '../types/rugby'
 
 type MatchCardProps = {
@@ -7,7 +8,9 @@ type MatchCardProps = {
   isComplete?: boolean
 }
 
-const eventPoints = (type: SimulatedMatch['events'][number]['type']) => {
+const eventPoints = (event: SimulatedMatch['events'][number]) => {
+  if (event.successful === false) return 0
+  const { type } = event
   if (type === 'TRY') return 5
   if (type === 'CONVERSION') return 2
   if (type === 'PENALTY' || type === 'DROP_GOAL') return 3
@@ -23,7 +26,7 @@ export const MatchCard = ({
   const visibleEvents = match.events.slice(0, visibleEventCount)
   const liveScore = visibleEvents.reduce(
     (score, event) => {
-      const points = eventPoints(event.type)
+      const points = eventPoints(event)
       return event.team === 'user'
         ? { ...score, user: score.user + points }
         : { ...score, opponent: score.opponent + points }
@@ -47,22 +50,23 @@ export const MatchCard = ({
     </p>
     <div className="event-list">
       {visibleEvents.length > 0 ? (
-        visibleEvents.map((event) => {
+        visibleEvents.map((event, index) => {
         const isUserTry = event.team === 'user' && event.type === 'TRY'
+        const points = eventPoints(event)
 
         return (
           <p
             className={isUserTry ? 'user-try-event' : undefined}
-            key={`${match.id}-${event.minute}-${event.playerName}-${event.type}`}
+            key={`${match.id}-${event.minute}-${event.playerName}-${event.type}-${index}`}
           >
             <span>{event.minute}'</span>{' '}
             <b className={event.team === 'user' ? 'event-team user-event-team' : 'event-team'}>
               {event.team === 'user' ? 'YOUR XV' : match.opponent.countryCode}
             </b>{' '}
-            <strong>{event.type.replace('_', ' ')}</strong>
-            {eventPoints(event.type) > 0 && (
+            <strong>{event.type.replace('_', ' ')}{event.successful === false ? ' MISSED' : ''}</strong>
+            {points > 0 && (
               <em className={event.team === 'user' ? 'event-points user-points' : 'event-points'}>
-                +{eventPoints(event.type)}
+                +{points}
               </em>
             )}{' '}
             - {event.playerName}
@@ -72,6 +76,12 @@ export const MatchCard = ({
       ) : (
         <p className="awaiting-event">Ready to simulate the match</p>
       )}
+    </div>
+    <div className="match-plan-summary">
+      <span>Captain: {match.captainName}</span>
+      <span>Kicker: {match.kickerName}</span>
+      <span>Tactic: {tacticById[match.setup.tactic].name}</span>
+      <strong>Standout: {match.standoutPlayerName}</strong>
     </div>
   </article>
   )
