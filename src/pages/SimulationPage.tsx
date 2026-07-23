@@ -15,6 +15,7 @@ const EVENT_REVEAL_MS = 1800
 
 export const SimulationPage = ({ matches, team, onContinue, onReplay }: SimulationPageProps) => {
   const currentMatch = matches[matches.length - 1]
+  const displayedMatches = [...matches].reverse()
   const [visibleEventCount, setVisibleEventCount] = useState(0)
   const [isSimulating, setIsSimulating] = useState(false)
   const currentMatchComplete = currentMatch ? visibleEventCount >= currentMatch.events.length : false
@@ -72,7 +73,7 @@ export const SimulationPage = ({ matches, team, onContinue, onReplay }: Simulati
         isSimulating={isSimulating}
       />
       <section className="match-grid">
-        {matches.map((match) => {
+        {displayedMatches.map((match) => {
           const isActive = match.id === currentMatch.id
           return (
             <MatchCard

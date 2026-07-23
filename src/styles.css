@@ -327,6 +327,17 @@ button:disabled {
   font-weight: 950;
 }
 
+.player-rating {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+}
+
+.player-lock-icon {
+  width: 18px;
+  height: 18px;
+}
+
 .player-name {
   font-weight: 900;
 }

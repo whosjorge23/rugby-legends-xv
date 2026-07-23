@@ -38,7 +38,35 @@ export const PlayerList = ({ squad, team, drawLocked, onSelect }: PlayerListProp
               <span className="player-number">#{player.shirtNumber}</span>
               <span className="player-name">{player.name}</span>
               <span className="player-position">{player.position}</span>
-              <span className="player-rating">{positionLocked ? 'LOCK' : player.overall}</span>
+              <span className="player-rating">
+                {positionLocked ? (
+                  <svg
+                    aria-label="Position locked"
+                    className="player-lock-icon"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M7 10V8a5 5 0 0 1 10 0v2"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2.5"
+                    />
+                    <rect
+                      width="14"
+                      height="11"
+                      x="5"
+                      y="10"
+                      rx="2.5"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                    />
+                  </svg>
+                ) : (
+                  player.overall
+                )}
+              </span>
             </button>
           )
         })
