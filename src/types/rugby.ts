@@ -89,12 +89,37 @@ export type SimulatedMatch = {
   standoutPlayerName: string
 }
 
+export type GroupFixtureResult = {
+  id: string
+  roundIndex: number
+  home: Squad
+  away: Squad
+  homeScore: number
+  awayScore: number
+}
+
 export type TeamRatings = {
   overall: number
   attack: number
   defense: number
   kicking: number
   discipline: number
+}
+
+export type ChemistryBonus = {
+  id: string
+  name: string
+  description: string
+  overall?: number
+  attack?: number
+  defense?: number
+  kicking?: number
+  discipline?: number
+}
+
+export type TeamChemistry = {
+  score: number
+  bonuses: ChemistryBonus[]
 }
 
 export type ResultSummary = {

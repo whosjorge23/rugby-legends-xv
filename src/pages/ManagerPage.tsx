@@ -1,6 +1,6 @@
 import { tactics } from '../data/tactics'
 import { calculateSquadRatings, selectedPlayers } from '../logic/ratings'
-import type { MatchStage, MatchdaySetup, SelectedTeam, Squad, TeamRatings } from '../types/rugby'
+import type { MatchStage, MatchdaySetup, SelectedTeam, Squad, TeamChemistry, TeamRatings } from '../types/rugby'
 import { Button } from '../components/Button'
 
 type ManagerPageProps = {
@@ -9,6 +9,7 @@ type ManagerPageProps = {
   matchNumber: number
   team: SelectedTeam
   ratings: TeamRatings
+  chemistry: TeamChemistry
   setup: MatchdaySetup
   onSetupChange: (setup: MatchdaySetup) => void
   onPlay: () => void
@@ -28,6 +29,7 @@ export const ManagerPage = ({
   matchNumber,
   team,
   ratings,
+  chemistry,
   setup,
   onSetupChange,
   onPlay,
@@ -68,6 +70,10 @@ export const ManagerPage = ({
             <span>Your XV {ratings.overall}</span>
             <strong>VS</strong>
             <span>{opponent.countryCode} {opponentRatings.overall}</span>
+          </div>
+          <div className="manager-chemistry">
+            <span>Chemistry +{chemistry.score}</span>
+            <strong>{chemistry.bonuses.length ? chemistry.bonuses.map((bonus) => bonus.name).join(' · ') : 'No active links yet'}</strong>
           </div>
         </article>
 

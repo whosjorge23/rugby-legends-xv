@@ -3,11 +3,12 @@ import { createEmptyTeam } from '../data/positions'
 import { squads } from '../data/squads'
 import { calculateRatings, completionCount, selectedPlayers } from '../logic/ratings'
 import { pickOne } from '../logic/random'
-import { createCupSchedule, cupStages, simulateMatch } from '../logic/simulation'
-import type { MatchdaySetup, Player, SelectedTeam, SimulatedMatch, Squad } from '../types/rugby'
+import { createCupSchedule, cupStages, simulateGroupFixture, simulateMatch } from '../logic/simulation'
+import { calculateChemistry } from '../logic/chemistry'
+import type { GroupFixtureResult, MatchdaySetup, Player, SelectedTeam, SimulatedMatch, Squad } from '../types/rugby'
 
 const STORAGE_KEY = 'rugby-legends-xv-state'
-const STATE_VERSION = 2
+const STATE_VERSION = 3
 
 type GameView = 'home' | 'build' | 'manager' | 'simulation' | 'result'
 
@@ -19,6 +20,7 @@ type SavedState = {
   teamRerolls: number
   cupRerolls: number
   matches: SimulatedMatch[]
+  groupFixtures: GroupFixtureResult[]
   cupSchedule: Squad[]
   matchdaySetup: MatchdaySetup | null
 }
@@ -31,6 +33,7 @@ const createInitialState = (): SavedState => ({
   teamRerolls: 3,
   cupRerolls: 3,
   matches: [],
+  groupFixtures: [],
   cupSchedule: [],
   matchdaySetup: null,
 })
@@ -60,6 +63,7 @@ const loadState = (): SavedState => {
     return {
       ...commonState,
       matches: Array.isArray(stored.matches) ? stored.matches : [],
+      groupFixtures: Array.isArray(stored.groupFixtures) ? stored.groupFixtures : [],
       cupSchedule: Array.isArray(stored.cupSchedule) ? stored.cupSchedule : [],
       matchdaySetup: stored.matchdaySetup ?? null,
     }
@@ -88,6 +92,7 @@ export const useGameState = () => {
   const [state, setState] = useState<SavedState>(loadState)
 
   const ratings = useMemo(() => calculateRatings(state.team), [state.team])
+  const chemistry = useMemo(() => calculateChemistry(state.team), [state.team])
   const completeCount = useMemo(() => completionCount(state.team), [state.team])
   const isComplete = completeCount === 15
   const nextMatchIndex = state.matches.length
@@ -150,6 +155,7 @@ export const useGameState = () => {
     setState((current) => ({
       ...current,
       matches: [],
+      groupFixtures: [],
       cupSchedule: createCupSchedule(current.drawnSquad ?? undefined),
       matchdaySetup: defaultMatchdaySetup(current.team, current.matchdaySetup),
     }))
@@ -169,7 +175,11 @@ export const useGameState = () => {
       if (!opponent || !stage || !isTeamComplete(current.team)) return current
 
       const match = simulateMatch(current.team, calculateRatings(current.team), opponent, stage, setup, matchIndex)
-      return { ...current, matchdaySetup: setup, matches: [...current.matches, match] }
+      const otherGroupTeams = current.cupSchedule.slice(0, 3).filter((squad) => squad.id !== opponent.id)
+      const nextGroupFixtures = stage === 'Groups' && otherGroupTeams[0] && otherGroupTeams[1]
+        ? [...current.groupFixtures, simulateGroupFixture(matchIndex, otherGroupTeams[0], otherGroupTeams[1])]
+        : current.groupFixtures
+      return { ...current, matchdaySetup: setup, matches: [...current.matches, match], groupFixtures: nextGroupFixtures }
     })
     setView('simulation')
   }
@@ -190,6 +200,7 @@ export const useGameState = () => {
     setState((current) => ({
       ...current,
       matches: [],
+      groupFixtures: [],
       cupSchedule: createCupSchedule(current.drawnSquad ?? undefined),
       matchdaySetup: defaultMatchdaySetup(current.team, current.matchdaySetup),
     }))
@@ -199,6 +210,7 @@ export const useGameState = () => {
   return {
     ...state,
     ratings,
+    chemistry,
     completeCount,
     isComplete,
     view,

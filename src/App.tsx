@@ -18,6 +18,7 @@ export const App = () => {
           drawnSquad={game.drawnSquad}
           team={game.team}
           ratings={game.ratings}
+          chemistry={game.chemistry}
           completeCount={game.completeCount}
           isComplete={game.isComplete}
           hasPickedFromDraw={game.hasPickedFromDraw}
@@ -37,6 +38,7 @@ export const App = () => {
           matchNumber={game.matches.length + 1}
           team={game.team}
           ratings={game.ratings}
+          chemistry={game.chemistry}
           setup={game.matchdaySetup}
           onSetupChange={game.updateMatchdaySetup}
           onPlay={game.playCurrentMatch}
@@ -46,6 +48,8 @@ export const App = () => {
       {game.view === 'simulation' && (
         <SimulationPage
           matches={game.matches}
+          groupFixtures={game.groupFixtures}
+          cupSchedule={game.cupSchedule}
           team={game.team}
           onContinue={game.finishMatch}
           onReplay={game.replay}

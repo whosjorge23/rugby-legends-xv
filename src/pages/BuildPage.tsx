@@ -2,12 +2,13 @@ import { PlayerList } from '../components/PlayerList'
 import { RatingPanel } from '../components/RatingPanel'
 import { RollPanel } from '../components/RollPanel'
 import { RugbyPitch } from '../components/RugbyPitch'
-import type { Player, SelectedTeam, Squad, TeamRatings } from '../types/rugby'
+import type { Player, SelectedTeam, Squad, TeamChemistry, TeamRatings } from '../types/rugby'
 
 type BuildPageProps = {
   drawnSquad: Squad | null
   team: SelectedTeam
   ratings: TeamRatings
+  chemistry: TeamChemistry
   completeCount: number
   isComplete: boolean
   hasPickedFromDraw: boolean
@@ -24,6 +25,7 @@ export const BuildPage = ({
   drawnSquad,
   team,
   ratings,
+  chemistry,
   completeCount,
   isComplete,
   hasPickedFromDraw,
@@ -53,6 +55,7 @@ export const BuildPage = ({
     <RatingPanel
       team={team}
       ratings={ratings}
+      chemistry={chemistry}
       completeCount={completeCount}
       isComplete={isComplete}
       onSimulate={onSimulate}

@@ -4,6 +4,7 @@ import { calculateSquadRatings, selectedPlayers } from './ratings'
 import { pickOne, randomInt, shuffle } from './random'
 import { respectSinBins } from './sinBin'
 import type {
+  GroupFixtureResult,
   MatchEvent,
   MatchStage,
   MatchdaySetup,
@@ -180,6 +181,34 @@ const standoutFor = (events: MatchEvent[], fallback: Player) => {
 
 export const createCupSchedule = (excludedSquad?: Squad): Squad[] =>
   shuffle(squads.filter((squad) => squad.id !== excludedSquad?.id)).slice(0, cupStages.length)
+
+const simulateSquadScore = (attacking: Squad, defending: Squad) => {
+  const attackingRatings = calculateSquadRatings(attacking)
+  const defendingRatings = calculateSquadRatings(defending)
+  const kicker = [...attacking.players].sort((left, right) => right.kicking - left.kicking)[0]
+  const events = makeTeamScoringEvents(
+    attacking.players,
+    scoringProfile(attackingRatings.attack, defendingRatings.defense, defendingRatings.discipline),
+    'opponent',
+    kicker,
+    Math.round((kicker.kicking * 2 + attackingRatings.kicking) / 3),
+  )
+
+  return scoreEvents(events).opponentScore
+}
+
+export const simulateGroupFixture = (
+  roundIndex: number,
+  home: Squad,
+  away: Squad,
+): GroupFixtureResult => ({
+  id: `group-${roundIndex}-${home.id}-${away.id}`,
+  roundIndex,
+  home,
+  away,
+  homeScore: simulateSquadScore(home, away),
+  awayScore: simulateSquadScore(away, home),
+})
 
 export const simulateMatch = (
   team: SelectedTeam,

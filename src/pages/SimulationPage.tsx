@@ -2,10 +2,13 @@ import { useEffect, useState } from 'react'
 import { MatchCard } from '../components/MatchCard'
 import { Button } from '../components/Button'
 import { LiveMatchPitch } from '../components/LiveMatchPitch'
-import type { SelectedTeam, SimulatedMatch } from '../types/rugby'
+import { TournamentTable } from '../components/TournamentTable'
+import type { GroupFixtureResult, SelectedTeam, SimulatedMatch, Squad } from '../types/rugby'
 
 type SimulationPageProps = {
   matches: SimulatedMatch[]
+  groupFixtures: GroupFixtureResult[]
+  cupSchedule: Squad[]
   team: SelectedTeam
   onContinue: () => void
   onReplay: () => void
@@ -13,12 +16,16 @@ type SimulationPageProps = {
 
 const EVENT_REVEAL_MS = 1800
 
-export const SimulationPage = ({ matches, team, onContinue, onReplay }: SimulationPageProps) => {
+export const SimulationPage = ({ matches, groupFixtures, cupSchedule, team, onContinue, onReplay }: SimulationPageProps) => {
   const currentMatch = matches[matches.length - 1]
   const displayedMatches = [...matches].reverse()
   const [visibleEventCount, setVisibleEventCount] = useState(0)
   const [isSimulating, setIsSimulating] = useState(false)
   const currentMatchComplete = currentMatch ? visibleEventCount >= currentMatch.events.length : false
+  const revealedMatches = matches.filter((match) => match.id !== currentMatch?.id || currentMatchComplete)
+  const completedGroupCount = revealedMatches.filter((match) => match.stage === 'Groups').length
+  const revealedGroupFixtures = groupFixtures.filter((fixture) => fixture.roundIndex < completedGroupCount)
+  const showTournamentTable = cupSchedule.slice(0, 3).length > 0
   const cupEnds = currentMatch
     ? (currentMatch.stage !== 'Groups' && currentMatch.result !== 'win') || currentMatch.stage === 'Final'
     : false
@@ -72,6 +79,9 @@ export const SimulationPage = ({ matches, team, onContinue, onReplay }: Simulati
         visibleEventCount={visibleEventCount}
         isSimulating={isSimulating}
       />
+      {showTournamentTable && (
+        <TournamentTable matches={revealedMatches} groupFixtures={revealedGroupFixtures} cupSchedule={cupSchedule} />
+      )}
       <section className="match-grid">
         {displayedMatches.map((match) => {
           const isActive = match.id === currentMatch.id

@@ -1,5 +1,6 @@
 import { positions } from '../data/positions'
 import type { Player, SelectedTeam, Squad, TeamRatings } from '../types/rugby'
+import { applyChemistry, calculateChemistry } from './chemistry'
 
 const average = (players: Player[], key: keyof TeamRatings) => {
   if (players.length === 0) return 0
@@ -11,13 +12,15 @@ export const selectedPlayers = (team: SelectedTeam) =>
 
 export const calculateRatings = (team: SelectedTeam): TeamRatings => {
   const players = selectedPlayers(team)
-  return {
+  const baseRatings = {
     overall: average(players, 'overall'),
     attack: average(players, 'attack'),
     defense: average(players, 'defense'),
     kicking: average(players, 'kicking'),
     discipline: average(players, 'discipline'),
   }
+
+  return applyChemistry(baseRatings, calculateChemistry(team))
 }
 
 export const completionCount = (team: SelectedTeam) => selectedPlayers(team).length
