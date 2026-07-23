@@ -2,6 +2,7 @@ import { positions } from '../data/positions'
 import { tacticById } from '../data/tactics'
 import type { ResultSummary, SelectedTeam, SimulatedMatch, TeamRatings } from '../types/rugby'
 import { Button } from './Button'
+import { ResultShareCard } from './ResultShareCard'
 
 type ResultCardProps = {
   summary: ResultSummary
@@ -49,6 +50,7 @@ export const ResultCard = ({ summary, team, ratings, matches, onReplay, onBuildA
         Build Another XV
       </Button>
     </div>
+    <ResultShareCard summary={summary} team={team} ratings={ratings} matches={matches} />
     <div className="final-xv">
       {positions.map((position) => {
         const player = team.slots[position.id]
