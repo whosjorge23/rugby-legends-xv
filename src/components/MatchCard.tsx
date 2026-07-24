@@ -81,7 +81,7 @@ export const MatchCard = ({
       <span>Captain: {match.captainName}</span>
       <span>Kicker: {match.kickerName}</span>
       <span>Tactic: {tacticById[match.setup.tactic].name}</span>
-      <strong>Standout: {match.standoutPlayerName}</strong>
+      <strong>Standout: {isComplete ? match.standoutPlayerName : ''}</strong>
     </div>
   </article>
   )
