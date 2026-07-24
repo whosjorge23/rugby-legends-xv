@@ -501,6 +501,7 @@ button:disabled {
   border: 1px solid rgba(21, 50, 72, 0.16);
   border-radius: 16px;
   background: #f8f4dc;
+  margin-top: 12px;
   padding: 14px;
 }
 
